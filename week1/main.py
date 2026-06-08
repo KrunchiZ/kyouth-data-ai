@@ -17,21 +17,21 @@ def run_profiler():
     run_data_profile(GOLD_DIR / DB_NAME)
 
 def run_gold():
-    print("🥇 Gold: ...")
+    print("🥇 Gold: Loading data...")
     load_all_jsons(SILVER_DIR, GOLD_DIR)
 
 def run_silver():
-    print("🥈 Silver: ...")
+    print("🥈 Silver: Processing data...")
     process_all_html(BRONZE_DIR, SILVER_DIR)
 
 def run_bronze():
-    print("🥉 Bronze: ...")
+    print("🥉 Bronze: Ingesting data...")
     ingest_all_mhtml(SOURCE_DIR, BRONZE_DIR)
 
 
 def main():
     if len(sys.argv) != 2:
-        print("Usage: python main.py <command>")
+        print("⚠️ Usage: python main.py <command>")
         return
     match sys.argv[1]:
         case "ingest":
@@ -42,8 +42,8 @@ def main():
             run_gold()
         case "profile":
             run_profiler()
-        case _: # default case
-            print(f"Unknown command: {sys.argv[1]}")
+        case _:
+            print(f"⚠️ Unknown command: {sys.argv[1]}")
 
 
 if __name__ == "__main__":

@@ -5,7 +5,6 @@ def ingest_all_mhtml(input_dir, output_dir):
     if not input_dir.exists():
         print(f"⚠️ Input directory not found: {input_dir}")
         return
-    total_count = len(list(input_dir.glob("*.mhtml")))
     extract_count = 0
     failed_count = 0
     output_dir.mkdir(parents=True, exist_ok=True)
@@ -31,4 +30,5 @@ def ingest_all_mhtml(input_dir, output_dir):
             if not html_found:
                 print(f"⚠️ No HTML content found in: {mhtml_file.name}")
                 failed_count += 1
+    total_count = len(list(input_dir.glob("*.mhtml")))
     print(f"\n📊 Bronze Summary:\nTotal: {total_count} | Extracted: {extract_count} | Failed: {failed_count}")
