@@ -17,8 +17,8 @@ def ingest_all_mhtml(input_dir, output_dir):
                     html_found = True
                     try:
                         html_str = part.get_content()
-                    except Exception as e:
-                        print(f"⚠️ Failed to decode: {mhtml_file.name} — {e}")
+                    except Exception as error_str:
+                        print(f"⚠️ Failed to decode: {mhtml_file.name} — {error_str}")
                         failed_count += 1
                         break
                     output_path = output_dir / (mhtml_file.stem + ".html")
