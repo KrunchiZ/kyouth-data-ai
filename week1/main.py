@@ -15,20 +15,13 @@ def run_profiler():
     run_data_profile(db_path)
 
 def run_gold():
-    input_dir = SILVER_DIR
-    output_dir = GOLD_DIR
-    load_all_jsons(input_dir, output_dir)
+    load_all_jsons(SILVER_DIR, GOLD_DIR)
 
 def run_silver():
-		input_dir = BRONZE_DIR
-		output_dir = SILVER_DIR
-    process_all_html(input_dir, output_dir)
-
+    process_all_html(BRONZE_DIR, SILVER_DIR)
 
 def run_bronze():
-    input_dir = SOURCE_DIR
-		output_dir = BRONZE_DIR
-    ingest_all_mhtml(input_dir, output_dir)
-    
+    ingest_all_mhtml(SOURCE_DIR, BRONZE_DIR)
+
 def main():
 	# ORCHESTRATION TO BE IMPLEMENTED HERE
