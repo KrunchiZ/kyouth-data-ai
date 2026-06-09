@@ -16,10 +16,14 @@ def ingest_all_mhtml(input_dir, output_dir):
     failed_count = 0    
     output_dir.mkdir(parents=True, exist_ok=True)
     for mhtml_file in input_dir.glob("*.mhtml"):
-        extract_count, failed_count = ingest_mhtml(extract_count, failed_count, mhtml_file, output_dir)
+        extract_count, failed_count = ingest_mhtml(extract_count, failed_count
+                                                   , mhtml_file, output_dir)
     
     total_count = len(list(input_dir.glob("*.mhtml")))
-    logging.info(f"\n📊 Bronze Summary:\nTotal: {total_count} | Extracted: {extract_count} | Failed: {failed_count}")
+    logging.info(
+        f"\n📊 Bronze Summary:\nTotal: {total_count} | "
+        f"Extracted: {extract_count} | Failed: {failed_count}"
+    )
 
 
 def ingest_mhtml(extract_count, failed_count, mhtml_file, output_dir):
@@ -34,7 +38,10 @@ def ingest_mhtml(extract_count, failed_count, mhtml_file, output_dir):
                 if isinstance(raw, bytes):
                     html_str = raw.decode("utf-8", errors="replace")
                 else:
-                    html_str = quopri.decodestring(raw.encode()).decode("utf-8", errors="replace")
+                    html_str = (
+                        quopri.decodestring(raw.encode()).decode("utf-8"
+                        , errors="replace")
+                    )
 
                 output_path = output_dir / (mhtml_file.stem + ".html")
                 with open(output_path, "w", encoding="utf-8") as out_file:
