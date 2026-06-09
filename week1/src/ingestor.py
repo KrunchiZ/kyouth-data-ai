@@ -1,7 +1,6 @@
-import logging
 import email
 import quopri
-from email.policy import default
+import logging
 
 
 logging.basicConfig(level=logging.INFO, format="%(message)s")
@@ -27,18 +26,15 @@ def ingest_mhtml(extract_count, failed_count, mhtml_file, output_dir):
     
     with open(mhtml_file, "rb") as in_file:
         html_found = False
-        msg = email.message_from_binary_file(in_file, policy=default)
+        msg = email.message_from_binary_file(in_file)
         for part in msg.walk():    
             if part.get_content_type() == "text/html":
                 html_found = True
-                try:
-                    html_str = part.get_content()
-                except Exception as error_str:
-                    raw = part.get_payload()
-                    if isinstance(raw, bytes):
-                        html_str = raw.decode("utf-8", errors="replace")
-                    else:
-                        html_str = quopri.decodestring(raw.encode()).decode("utf-8", errors="replace")
+                raw = part.get_payload()
+                if isinstance(raw, bytes):
+                    html_str = raw.decode("utf-8", errors="replace")
+                else:
+                    html_str = quopri.decodestring(raw.encode()).decode("utf-8", errors="replace")
 
                 output_path = output_dir / (mhtml_file.stem + ".html")
                 with open(output_path, "w", encoding="utf-8") as out_file:
