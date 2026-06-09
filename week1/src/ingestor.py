@@ -40,13 +40,15 @@ def ingest_mhtml(extract_count, failed_count, mhtml_file, output_dir):
 
                     output_path = output_dir / (mhtml_file.stem + ".html")
                     try:
-                        with open(output_path, "w", encoding="utf-8") as out_file:
+                        with open(output_path, "w"
+                                  , encoding="utf-8") as out_file:
                             out_file.write(html_str)
                             print(f"✅ Extracted: {mhtml_file.name}")
                             extract_count += 1
                             break
                     except Exception as code:
-                        print(f"⚠️️ Error writing {mhtml_file.name}: {code}")
+                        print(f"⚠️️ Error writing HTML: {mhtml_file.name}"
+                              f": {code}")
                         failed_count += 1
                         break
 
