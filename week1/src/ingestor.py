@@ -14,16 +14,14 @@ def ingest_all_mhtml(input_dir, output_dir):
     if not init_output_dir(output_dir):
         return    
         
-    extract_count = 0
-    failed_count = 0    
+    extract_count = 0   
     for mhtml_file in input_dir.glob("*.mhtml"):
-        extract_count, failed_count = ingest_mhtml(extract_count, failed_count
-                                                   , mhtml_file, output_dir)
+        extract_count = ingest_mhtml(extract_count, mhtml_file, output_dir)
     
     total_count = len(list(input_dir.glob("*.mhtml")))
     print(
         f"\n📊 Bronze Summary:\nTotal: {total_count} | "
-        f"Extracted: {extract_count} | Failed: {failed_count}"
+        f"Extracted: {extract_count} | Failed: {total_count - extract_count}"
     )
 
 
@@ -46,7 +44,7 @@ def init_output_dir(output_dir):
         return False
 
 
-def ingest_mhtml(extract_count, failed_count, mhtml_file, output_dir):
+def ingest_mhtml(extract_count, mhtml_file, output_dir):
     try:
         with open(mhtml_file, "rb") as in_file:
             html_found = False
@@ -55,37 +53,30 @@ def ingest_mhtml(extract_count, failed_count, mhtml_file, output_dir):
                 if part.get_content_type() == "text/html":
                     html_found = True
                     charset = part.get_content_charset() or "utf-8"
-                    raw = part.get_payload()
-                    if not raw:
+                    html_str = part.get_payload()
+                    if not html_str:
                         logging.warning(f"Empty HTML content in: {mhtml_file.name}")
-                        failed_count += 1
                         break
-                    if isinstance(raw, str):
-                        html_str = quopri.decodestring(raw.encode())
+                    if isinstance(html_str, str):
+                        html_str = quopri.decodestring(html_str.encode())
                     html_str = html_str.decode(charset, errors="replace")
 
                     output_path = output_dir / (mhtml_file.stem + ".html")
                     if write_html(output_path, html_str, mhtml_file):
                         extract_count += 1
-                    else:
-                        failed_count += 1
                     break
-
             if not html_found:
                 logging.warning(f"No HTML content found in: {mhtml_file.name}")
-                failed_count += 1
-                
+
     except Exception as code:
         logging.error(f"Error ingesting {mhtml_file.name}: {code}")
-        failed_count += 1
 
-    return extract_count, failed_count
+    return extract_count
 
 
 def write_html(output_path, html_str, mhtml_file):
     try:
-        with open(output_path, "w"
-                    , encoding="utf-8") as out_file:
+        with open(output_path, "w", encoding="utf-8") as out_file:
             out_file.write(html_str)
             logging.info(f"Extracted: {mhtml_file.name}")
             return True
