@@ -28,22 +28,30 @@ def run_bronze():
     print("🥉 Bronze: Ingesting data...")
     ingest_all_mhtml(SOURCE_DIR, BRONZE_DIR)
 
+def run_all():
+    run_bronze()
+    run_silver()
+    run_gold()
+    run_profiler()
+
 
 def main():
     if len(sys.argv) != 2:
-        print("⚠️ Usage: python main.py <command>")
+        print("Usage: python main.py [ingest|process|load|profile|all]")
         return
-    match sys.argv[1]:
-        case "ingest":
-            run_bronze()
-        case "process":
-            run_silver()
-        case "load":
-            run_gold()
-        case "profile":
-            run_profiler()
-        case _:
-            print(f"⚠️ Unknown command: {sys.argv[1]}")
+        
+    commands = {
+        "ingest":   run_bronze,
+        "process":  run_silver,
+        "load":     run_gold,
+        "profile":  run_profiler,
+        "all":      run_all
+    }    
+    if sys.argv[1] not in commands:
+        print("Usage: python main.py [ingest|process|load|profile|all]")
+        return
+
+    commands[sys.argv[1]]()
 
 
 if __name__ == "__main__":
