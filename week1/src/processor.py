@@ -1,5 +1,11 @@
 from bs4 import BeautifulSoup
 from pydantic import BaseModel
+import logging
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s |%(levelname)s |%(message)s"
+)
 
 class JobListing(BaseModel):
     source_id: str
@@ -10,7 +16,7 @@ class JobListing(BaseModel):
 
 def process_all_html(input_dir, output_dir):
     if not input_dir.exists():
-        print(f"⚠️ Input directory not found: {input_dir}")
+        logging.warning(f"⚠ Input directory not found: {input_dir}")
         return
 
     process_count = 0
@@ -26,21 +32,21 @@ def process_all_html(input_dir, output_dir):
                 )
                 job_title = get_soup_text(soup, "job-detail-title")
                 if not job_title:
-                    print(f"⚠️ Missing job title in: {html_file.name}")
+                    logging.warning(f"⚠ Missing job title in: {html_file.name}")
                     skip_count += 1
                     continue
                 company = get_soup_text(soup, "advertiser-name")
                 if not company:
-                    print(f"⚠️ Missing company in: {html_file.name}")
+                    logging.warning(f"⚠ Missing company in: {html_file.name}")
                     skip_count += 1
                     continue
                 description = get_soup_text(soup, "jobAdDetails")
                 if not description:
-                    print(f"⚠️ Missing description in: {html_file.name}")
+                    logging.warning(f"⚠ Missing description in: {html_file.name}")
                     skip_count += 1
                     continue
         except Exception as code:
-            print(f"⚠️ Error processing {html_file.name}: {code}")
+            logging.error(f"⚠ Error processing {html_file.name}: {code}")
             skip_count += 1
             continue
 
@@ -74,8 +80,8 @@ def generate_json_success(output_dir, html_file, output_data):
     try:
         with open(output_path, "w", encoding="utf-8") as out_file:
             out_file.write(output_data.model_dump_json(indent=2))
-            print(f"✅ Processed: {html_file.name}")
+            logging.info(f"Processed: {html_file.name}")
             return True
     except Exception as code:
-        print(f"⚠️ Error writing JSON for {html_file.name}: {code}")
+        logging.error(f"⚠ Error writing JSON for {html_file.name}: {code}")
         return False

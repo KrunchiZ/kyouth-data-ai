@@ -1,10 +1,15 @@
 import email
 import quopri
+import logging
 
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s |%(levelname)s |%(message)s"
+)
 
 def ingest_all_mhtml(input_dir, output_dir):
     if not input_dir.exists():
-        print(f"⚠️ Input directory not found: {input_dir}")
+        logging.warning(f"⚠ Input directory not found: {input_dir}")
         return
 
     extract_count = 0
@@ -43,21 +48,21 @@ def ingest_mhtml(extract_count, failed_count, mhtml_file, output_dir):
                         with open(output_path, "w"
                                   , encoding="utf-8") as out_file:
                             out_file.write(html_str)
-                            print(f"✅ Extracted: {mhtml_file.name}")
+                            logging.info(f"Extracted: {mhtml_file.name}")
                             extract_count += 1
                             break
                     except Exception as code:
-                        print(f"⚠️️ Error writing HTML: {mhtml_file.name}"
+                        logging.error(f"⚠ Error writing HTML: {mhtml_file.name}"
                               f": {code}")
                         failed_count += 1
                         break
 
             if not html_found:
-                print(f"⚠️ No HTML content found in: {mhtml_file.name}")
+                logging.warning(f"⚠ No HTML content found in: {mhtml_file.name}")
                 failed_count += 1
 
     except Exception as code:
-        print(f"⚠️ Error ingesting {mhtml_file.name}: {code}")
+        logging.error(f"⚠ Error ingesting {mhtml_file.name}: {code}")
         failed_count += 1
 
     return extract_count, failed_count
