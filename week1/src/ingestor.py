@@ -35,6 +35,10 @@ def ingest_mhtml(extract_count, failed_count, mhtml_file, output_dir):
                 if part.get_content_type() == "text/html":
                     html_found = True
                     raw = part.get_payload()
+                    if not raw:
+                        logging.warning(f"⚠ Empty HTML content in: {mhtml_file.name}")
+                        failed_count += 1
+                        break
                     if isinstance(raw, bytes):
                         html_str = raw.decode("utf-8", errors="replace")
                     else:
