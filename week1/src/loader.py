@@ -23,23 +23,23 @@ def load_all_jsons(input_dir, output_dir):
                 data = json.load(in_file)
             
             entry = init_entry(data)
-            with conn.cursor() as cursor:
-                cursor.execute(
-                    """
-                    INSERT OR IGNORE INTO jobs (
-                        source_id, job_title, company, description,
-                        tech_stack, quality, content_hash
-                    )
-                    VALUES (?, ?, ?, ?, ?, ?, ?)
-                    """, 
-                    tuple(entry.values())
+            cursor = conn.cursor()
+            cursor.execute(
+                """
+                INSERT OR IGNORE INTO jobs (
+                    source_id, job_title, company, description,
+                    tech_stack, quality, content_hash
                 )
-                if cursor.rowcount == 1:
-                    logging.info(f"Inserted: {json_file.name}")
-                    insert_count += 1
-                else:
-                    logging.warning(f"⚠ Skipped (duplicate): {json_file.name}")
-                    skip_count += 1
+                VALUES (?, ?, ?, ?, ?, ?, ?)
+                """, 
+                tuple(entry.values())
+            )
+            if cursor.rowcount == 1:
+                logging.info(f"Inserted: {json_file.name}")
+                insert_count += 1
+            else:
+                logging.warning(f"⚠ Skipped (duplicate): {json_file.name}")
+                skip_count += 1
             conn.commit()
 
         except Exception as code:
@@ -55,21 +55,20 @@ def load_all_jsons(input_dir, output_dir):
 
 def init_db(db_path):
     with sqlite3.connect(db_path) as conn:
-        with conn.cursor() as cursor:
-            cursor.execute(
-                """
-                CREATE TABLE IF NOT EXISTS jobs (
-                    source_id       TEXT PRIMARY KEY,
-                    job_title       TEXT NOT NULL,
-                    company         TEXT NOT NULL,
-                    description     TEXT NOT NULL,
-                    tech_stack      TEXT,
-                    quality         TEXT,
-                    content_hash    TEXT NOT NULL
-                )
-                """
+        cursor = conn.cursor()
+        cursor.execute(
+            """
+            CREATE TABLE IF NOT EXISTS jobs (
+                source_id       TEXT PRIMARY KEY,
+                job_title       TEXT NOT NULL,
+                company         TEXT NOT NULL,
+                description     TEXT NOT NULL,
+                tech_stack      TEXT,
+                quality         TEXT,
+                content_hash    TEXT NOT NULL
             )
-    conn.commit()
+            """
+        )
     return conn
 
 
