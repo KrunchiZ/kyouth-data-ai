@@ -22,33 +22,26 @@ def process_all_html(input_dir, output_dir):
         return    
 
     process_count = 0
-    skip_count = 0
     for html_file in input_dir.glob("*.html"):
         try:
             with open(html_file, "r", encoding="utf-8") as in_file:
                 soup = BeautifulSoup(in_file, "html.parser")
-                source_id = (
-                    soup.find("meta", property="og:url")["content"]
-                    .rstrip("/").split("/")[-1]
-                )
+                source_id = (soup.find("meta", property="og:url")["content"]
+                            .rstrip("/").split("/")[-1])
                 job_title = get_soup_text(soup, "job-detail-title")
                 if not job_title:
                     logging.warning(f"Missing job title in: {html_file.name}")
-                    skip_count += 1
                     continue
                 company = get_soup_text(soup, "advertiser-name")
                 if not company:
                     logging.warning(f"Missing company in: {html_file.name}")
-                    skip_count += 1
                     continue
                 description = get_soup_text(soup, "jobAdDetails")
                 if not description:
                     logging.warning(f"Missing description in: {html_file.name}")
-                    skip_count += 1
                     continue
         except Exception as code:
             logging.error(f"Error processing {html_file.name}: {code}")
-            skip_count += 1
             continue
 
         output_data = JobListing(
@@ -59,12 +52,10 @@ def process_all_html(input_dir, output_dir):
         )
         if generate_json_success(output_dir, html_file, output_data):
             process_count += 1
-        else:
-            skip_count += 1
 
     total_count = len(list(input_dir.glob("*.html")))
-    print(f"\n📊 Silver Summary:\nTotal: {total_count} | "
-          f"Processed: {process_count} | Skipped: {skip_count}")
+    print(f"\n📊 Silver Summary:\nTotal: {total_count} | Processed: "
+          f"{process_count} | Skipped: {total_count - process_count}")
 
 
 def input_dir_isValid(input_dir):

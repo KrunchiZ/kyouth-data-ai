@@ -16,7 +16,6 @@ def load_all_jsons(input_dir, output_dir):
         return
 
     insert_count = 0
-    skip_count = 0    
     conn = init_db(output_dir / "jobs.db")
     for json_file in input_dir.glob("*.json"):
         try:
@@ -40,18 +39,16 @@ def load_all_jsons(input_dir, output_dir):
                 insert_count += 1
             else:
                 logging.warning(f"Skipped (duplicate): {json_file.name}")
-                skip_count += 1
             conn.commit()
 
         except Exception as code:
             logging.error(f"Skipped ({code}): {json_file.name}")
-            skip_count += 1
             continue        
 
     conn.close()
     total_count = len(list(input_dir.glob("*.json")))
     print(f"\n📊 Gold Summary:\nTotal: {total_count} | "
-          f"Inserted: {insert_count} | Skipped: {skip_count}")
+          f"Inserted: {insert_count} | Skipped: {total_count - insert_count}")
 
 
 def input_dir_isValid(input_dir):
