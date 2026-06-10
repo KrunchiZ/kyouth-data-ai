@@ -34,16 +34,17 @@ def ingest_mhtml(extract_count, failed_count, mhtml_file, output_dir):
             for part in msg.walk():    
                 if part.get_content_type() == "text/html":
                     html_found = True
+                    charset = part.get_content_charset() or "utf-8"
                     raw = part.get_payload()
                     if not raw:
                         logging.warning(f"Empty HTML content in: {mhtml_file.name}")
                         failed_count += 1
                         break
                     if isinstance(raw, bytes):
-                        html_str = raw.decode("utf-8", errors="replace")
+                        html_str = raw.decode(charset, errors="replace")
                     else:
                         html_str = (
-                            quopri.decodestring(raw.encode()).decode("utf-8"
+                            quopri.decodestring(raw.encode()).decode(charset
                             , errors="replace")
                         )
 
