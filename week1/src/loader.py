@@ -5,7 +5,7 @@ from hashlib import sha256
 
 logging.basicConfig(
     level=logging.INFO,
-    format="%(asctime)s |%(levelname)s |%(message)s"
+    format="%(asctime)s | %(levelname)s | %(message)s"
 )
 
 def load_all_jsons(input_dir, output_dir):

@@ -4,7 +4,7 @@ import logging
 
 logging.basicConfig(
     level=logging.INFO,
-    format="%(asctime)s |%(levelname)s |%(message)s"
+    format="%(asctime)s | %(levelname)s | %(message)s"
 )
 
 def ingest_all_mhtml(input_dir, output_dir):
