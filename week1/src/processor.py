@@ -1,6 +1,7 @@
+import os
+import logging
 from bs4 import BeautifulSoup
 from pydantic import BaseModel
-import logging
 
 logging.basicConfig(
     level=logging.INFO,
@@ -15,13 +16,13 @@ class JobListing(BaseModel):
 
 
 def process_all_html(input_dir, output_dir):
-    if not input_dir.exists():
-        logging.warning(f"Input directory not found: {input_dir}")
+    if not input_dir_isValid(input_dir):
         return
+    if not init_output_dir(output_dir):
+        return    
 
     process_count = 0
-    skip_count = 0    
-    output_dir.mkdir(parents=True, exist_ok=True)
+    skip_count = 0
     for html_file in input_dir.glob("*.html"):
         try:
             with open(html_file, "r", encoding="utf-8") as in_file:
@@ -64,6 +65,25 @@ def process_all_html(input_dir, output_dir):
     total_count = len(list(input_dir.glob("*.html")))
     print(f"\n📊 Silver Summary:\nTotal: {total_count} | "
           f"Processed: {process_count} | Skipped: {skip_count}")
+
+
+def input_dir_isValid(input_dir):
+    if not input_dir.exists():
+        logging.warning(f"Input directory not found: {input_dir}")
+        return False
+    if not os.access(input_dir, os.R_OK):
+        logging.warning(f"Input directory not readable: {input_dir}")
+        return False
+    return True
+
+
+def init_output_dir(output_dir):
+    try:
+        output_dir.mkdir(parents=True, exist_ok=True)
+        return True
+    except Exception as code:
+        logging.error(f"{code}: {output_dir}")
+        return False
 
 
 def get_soup_text(soup, attr_value):    

@@ -1,3 +1,4 @@
+import os
 import json
 import sqlite3
 import logging
@@ -9,13 +10,13 @@ logging.basicConfig(
 )
 
 def load_all_jsons(input_dir, output_dir):
-    if not input_dir.exists():
-        logging.warning(f"Input directory not found: {input_dir}")
+    if not input_dir_isValid(input_dir):
         return
-    
+    if not init_output_dir(output_dir):
+        return
+
     insert_count = 0
     skip_count = 0    
-    output_dir.mkdir(parents=True, exist_ok=True)
     conn = init_db(output_dir / "jobs.db")
     for json_file in input_dir.glob("*.json"):
         try:
@@ -51,6 +52,25 @@ def load_all_jsons(input_dir, output_dir):
     total_count = len(list(input_dir.glob("*.json")))
     print(f"\n📊 Gold Summary:\nTotal: {total_count} | "
           f"Inserted: {insert_count} | Skipped: {skip_count}")
+
+
+def input_dir_isValid(input_dir):
+    if not input_dir.exists():
+        logging.warning(f"Input directory not found: {input_dir}")
+        return False
+    if not os.access(input_dir, os.R_OK):
+        logging.warning(f"Input directory not readable: {input_dir}")
+        return False
+    return True
+
+
+def init_output_dir(output_dir):
+    try:
+        output_dir.mkdir(parents=True, exist_ok=True)
+        return True
+    except Exception as code:
+        logging.error(f"{code}: {output_dir}")
+        return False
 
 
 def init_db(db_path):

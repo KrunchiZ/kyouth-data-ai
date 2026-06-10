@@ -1,3 +1,4 @@
+import os
 import email
 import quopri
 import logging
@@ -8,13 +9,13 @@ logging.basicConfig(
 )
 
 def ingest_all_mhtml(input_dir, output_dir):
-    if not input_dir.exists():
-        logging.warning(f"Input directory not found: {input_dir}")
+    if not input_dir_isValid(input_dir):
         return
-
+    if not init_output_dir(output_dir):
+        return    
+        
     extract_count = 0
     failed_count = 0    
-    output_dir.mkdir(parents=True, exist_ok=True)
     for mhtml_file in input_dir.glob("*.mhtml"):
         extract_count, failed_count = ingest_mhtml(extract_count, failed_count
                                                    , mhtml_file, output_dir)
@@ -24,6 +25,25 @@ def ingest_all_mhtml(input_dir, output_dir):
         f"\n📊 Bronze Summary:\nTotal: {total_count} | "
         f"Extracted: {extract_count} | Failed: {failed_count}"
     )
+
+
+def input_dir_isValid(input_dir):
+    if not input_dir.exists():
+        logging.warning(f"Input directory not found: {input_dir}")
+        return False
+    if not os.access(input_dir, os.R_OK):
+        logging.warning(f"Input directory not readable: {input_dir}")
+        return False
+    return True
+
+
+def init_output_dir(output_dir):
+    try:
+        output_dir.mkdir(parents=True, exist_ok=True)
+        return True
+    except Exception as code:
+        logging.error(f"{code}: {output_dir}")
+        return False
 
 
 def ingest_mhtml(extract_count, failed_count, mhtml_file, output_dir):
