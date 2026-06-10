@@ -16,7 +16,7 @@ class JobListing(BaseModel):
 
 def process_all_html(input_dir, output_dir):
     if not input_dir.exists():
-        logging.warning(f"⚠ Input directory not found: {input_dir}")
+        logging.warning(f"Input directory not found: {input_dir}")
         return
 
     process_count = 0
@@ -32,21 +32,21 @@ def process_all_html(input_dir, output_dir):
                 )
                 job_title = get_soup_text(soup, "job-detail-title")
                 if not job_title:
-                    logging.warning(f"⚠ Missing job title in: {html_file.name}")
+                    logging.warning(f"Missing job title in: {html_file.name}")
                     skip_count += 1
                     continue
                 company = get_soup_text(soup, "advertiser-name")
                 if not company:
-                    logging.warning(f"⚠ Missing company in: {html_file.name}")
+                    logging.warning(f"Missing company in: {html_file.name}")
                     skip_count += 1
                     continue
                 description = get_soup_text(soup, "jobAdDetails")
                 if not description:
-                    logging.warning(f"⚠ Missing description in: {html_file.name}")
+                    logging.warning(f"Missing description in: {html_file.name}")
                     skip_count += 1
                     continue
         except Exception as code:
-            logging.error(f"⚠ Error processing {html_file.name}: {code}")
+            logging.error(f"Error processing {html_file.name}: {code}")
             skip_count += 1
             continue
 
@@ -83,5 +83,5 @@ def generate_json_success(output_dir, html_file, output_data):
             logging.info(f"Processed: {html_file.name}")
             return True
     except Exception as code:
-        logging.error(f"⚠ Error writing JSON for {html_file.name}: {code}")
+        logging.error(f"Error writing JSON for {html_file.name}: {code}")
         return False

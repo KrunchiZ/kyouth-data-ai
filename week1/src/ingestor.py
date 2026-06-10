@@ -9,7 +9,7 @@ logging.basicConfig(
 
 def ingest_all_mhtml(input_dir, output_dir):
     if not input_dir.exists():
-        logging.warning(f"⚠ Input directory not found: {input_dir}")
+        logging.warning(f"Input directory not found: {input_dir}")
         return
 
     extract_count = 0
@@ -36,7 +36,7 @@ def ingest_mhtml(extract_count, failed_count, mhtml_file, output_dir):
                     html_found = True
                     raw = part.get_payload()
                     if not raw:
-                        logging.warning(f"⚠ Empty HTML content in: {mhtml_file.name}")
+                        logging.warning(f"Empty HTML content in: {mhtml_file.name}")
                         failed_count += 1
                         break
                     if isinstance(raw, bytes):
@@ -56,17 +56,17 @@ def ingest_mhtml(extract_count, failed_count, mhtml_file, output_dir):
                             extract_count += 1
                             break
                     except Exception as code:
-                        logging.error(f"⚠ Error writing HTML: {mhtml_file.name}"
+                        logging.error(f"Error writing HTML: {mhtml_file.name}"
                               f": {code}")
                         failed_count += 1
                         break
 
             if not html_found:
-                logging.warning(f"⚠ No HTML content found in: {mhtml_file.name}")
+                logging.warning(f"No HTML content found in: {mhtml_file.name}")
                 failed_count += 1
 
     except Exception as code:
-        logging.error(f"⚠ Error ingesting {mhtml_file.name}: {code}")
+        logging.error(f"Error ingesting {mhtml_file.name}: {code}")
         failed_count += 1
 
     return extract_count, failed_count

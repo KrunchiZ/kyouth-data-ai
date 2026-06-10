@@ -10,7 +10,7 @@ logging.basicConfig(
 
 def load_all_jsons(input_dir, output_dir):
     if not input_dir.exists():
-        logging.warning(f"⚠ Input directory not found: {input_dir}")
+        logging.warning(f"Input directory not found: {input_dir}")
         return
     
     insert_count = 0
@@ -38,12 +38,12 @@ def load_all_jsons(input_dir, output_dir):
                 logging.info(f"Inserted: {json_file.name}")
                 insert_count += 1
             else:
-                logging.warning(f"⚠ Skipped (duplicate): {json_file.name}")
+                logging.warning(f"Skipped (duplicate): {json_file.name}")
                 skip_count += 1
             conn.commit()
 
         except Exception as code:
-            logging.error(f"⚠ Skipped ({code}): {json_file.name}")
+            logging.error(f"Skipped ({code}): {json_file.name}")
             skip_count += 1
             continue        
 
