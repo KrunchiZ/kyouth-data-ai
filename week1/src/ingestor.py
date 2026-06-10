@@ -60,13 +60,9 @@ def ingest_mhtml(extract_count, failed_count, mhtml_file, output_dir):
                         logging.warning(f"Empty HTML content in: {mhtml_file.name}")
                         failed_count += 1
                         break
-                    if isinstance(raw, bytes):
-                        html_str = raw.decode(charset, errors="replace")
-                    else:
-                        html_str = (
-                            quopri.decodestring(raw.encode()).decode(charset
-                            , errors="replace")
-                        )
+                    if isinstance(raw, str):
+                        html_str = quopri.decodestring(raw.encode())
+                    html_str = html_str.decode(charset, errors="replace")
 
                     output_path = output_dir / (mhtml_file.stem + ".html")
                     if write_html(output_path, html_str, mhtml_file):
@@ -78,7 +74,7 @@ def ingest_mhtml(extract_count, failed_count, mhtml_file, output_dir):
             if not html_found:
                 logging.warning(f"No HTML content found in: {mhtml_file.name}")
                 failed_count += 1
-
+                
     except Exception as code:
         logging.error(f"Error ingesting {mhtml_file.name}: {code}")
         failed_count += 1
