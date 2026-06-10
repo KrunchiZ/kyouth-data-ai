@@ -1,7 +1,7 @@
 import os
-import email
 import quopri
 import logging
+from email import message_from_binary_file
 
 logging.basicConfig(
     level=logging.INFO,
@@ -50,7 +50,7 @@ def ingest_mhtml(extract_count, failed_count, mhtml_file, output_dir):
     try:
         with open(mhtml_file, "rb") as in_file:
             html_found = False
-            msg = email.message_from_binary_file(in_file)
+            msg = message_from_binary_file(in_file)
             for part in msg.walk():    
                 if part.get_content_type() == "text/html":
                     html_found = True
@@ -78,7 +78,7 @@ def ingest_mhtml(extract_count, failed_count, mhtml_file, output_dir):
                             break
                     except Exception as code:
                         logging.error(f"Error writing HTML: {mhtml_file.name}"
-                              f": {code}")
+                                      f": {code}")
                         failed_count += 1
                         break
 
