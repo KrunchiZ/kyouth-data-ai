@@ -14,7 +14,6 @@ logging.basicConfig(
 QUERY_DIR = Path("queries")
 OPEN_TABLE_QUERY = QUERY_DIR / "open_table.sql"
 INSERT_FIELDS_QUERY = QUERY_DIR / "insert_fields.sql"
-UPDATE_FIELDS_QUERY = QUERY_DIR / "update_fields.sql"
 GET_CONTENT_HASH_QUERY = QUERY_DIR / "get_content_hash.sql"
 
 
@@ -36,16 +35,16 @@ def load_all_jsons(input_dir, output_dir):
             cursor.execute(GET_CONTENT_HASH_QUERY.read_text(encoding="utf-8")
                             , (entry["source_id"],))
             existing_hash = cursor.fetchone()
-            if existing_hash is None:
-                upsert_entry(conn, entry, "insert")
-                logging.info(f"Inserted: {json_file.name}")
-                insert_count += 1
-            elif existing_hash[0] != entry["content_hash"]:
-                upsert_entry(conn, entry, "update")
-                logging.info(f"Updated: {json_file.name}")
-                insert_count += 1
-            else:
+            if (existing_hash is not None 
+                and existing_hash[0] == entry["content_hash"]):
                 logging.info(f"Skipped (duplicate): {json_file.name}")
+                continue
+            upsert_entry(conn, entry)
+            if existing_hash is None:
+                logging.info(f"Inserted: {json_file.name}")
+            else:
+                logging.info(f"Updated: {json_file.name}")
+            insert_count += 1
             conn.commit()
 
         except Exception as code:
@@ -100,25 +99,14 @@ def init_entry(data):
     }
 
 
-def upsert_entry(conn, entry, action):
+def upsert_entry(conn, entry):
     cursor = conn.cursor()
-    if action == "insert":
-        cursor.execute(INSERT_FIELDS_QUERY.read_text(encoding="utf-8"), (
-                       entry["source_id"],
-                       entry["job_title"],
-                       entry["company"],
-                       entry["description"],
-                       entry["tech_stack"],
-                       entry["quality"],
-                       entry["content_hash"]
-        ))
-    elif action == "update":
-        cursor.execute(UPDATE_FIELDS_QUERY.read_text(encoding="utf-8"), (
-                       entry["job_title"],
-                       entry["company"],
-                       entry["description"],
-                       entry["tech_stack"],
-                       entry["quality"],
-                       entry["content_hash"],
-                       entry["source_id"]
-        ))
+    cursor.execute(INSERT_FIELDS_QUERY.read_text(encoding="utf-8"), (
+                    entry["source_id"],
+                    entry["job_title"],
+                    entry["company"],
+                    entry["description"],
+                    entry["tech_stack"],
+                    entry["quality"],
+                    entry["content_hash"]
+    ))
