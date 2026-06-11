@@ -1,12 +1,13 @@
 UPDATE jobs
 SET quality = 'LOW'
 WHERE 
-    LENGTH(description) < 100
-    OR job_title IS NULL 
+    job_title IS NULL 
     OR company IS NULL 
-    OR description IS NULL;
+    OR description IS NULL
+    OR LENGTH(description) < 100
+    OR description REGEXP '[!#@\*\$%]{4,}';
 
 UPDATE jobs
 SET quality = 'HIGH'
 WHERE
-    QUALITY IS NULL;
+    quality IS NULL;

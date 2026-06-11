@@ -1,4 +1,5 @@
 import os
+import re
 import sqlite3
 import logging
 from pathlib import Path
@@ -26,7 +27,7 @@ def run_data_profile(db_path):
     stats = get_data_profile_stats(db_path)
     print_data_profile_report(stats)
     set_data_quality(db_path)
-    quarantine_low_quality_profiles(db_path)
+    quarantine_profiles(db_path)
 
 
 def input_db_isValid(db_path):
@@ -89,9 +90,24 @@ def print_data_profile_report(stats):
 
 
 def set_data_quality(db_path):
+    def has_consecutive_special(pattern, value):
+        return bool(re.search(pattern, value)) if value else False
+
     try:
         with sqlite3.connect(db_path) as conn:
             cursor = conn.cursor()
+            conn.create_function("REGEXP", 2, has_consecutive_special)
             cursor.executescript(SET_QUALITY_QUERY.read_text(encoding="utf-8"))
     except sqlite3.Error as code:
         logging.error(f"Set Quality Error: {code}")
+
+
+def quarantine_profiles(db_path):
+    try:
+        with sqlite3.connect(db_path) as conn:
+            cursor = conn.cursor()
+            cursor.execute('''
+                '''
+            )
+    except sqlite3.Error as code:
+        logging.error(f"Quarantine Error: {code}")
