@@ -5,6 +5,7 @@ import logging
 from pathlib import Path
 from hashlib import sha256
 
+
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s | %(levelname)s | %(message)s"
@@ -13,6 +14,7 @@ logging.basicConfig(
 QUERY_DIR = Path("queries")
 OPEN_TABLE_QUERY = QUERY_DIR / "open_table.sql"
 INSERT_FIELDS_QUERY = QUERY_DIR / "insert_fields.sql"
+
 
 def load_all_jsons(input_dir, output_dir):
     if not input_dir_isValid(input_dir):
