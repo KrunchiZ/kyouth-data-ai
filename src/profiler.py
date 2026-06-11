@@ -3,20 +3,21 @@ import sqlite3
 import logging
 from pathlib import Path
 
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s | %(levelname)s | %(message)s"
-)
-
-
 QUERY_DIR = Path("queries")
 COUNT_JOBS_QUERY = QUERY_DIR / "count_jobs.sql"
 COUNT_NULL_TITLES_QUERY = QUERY_DIR / "count_null_titles.sql"
 COUNT_NULL_COMPANIES_QUERY = QUERY_DIR / "count_null_companies.sql"
-COUNT_NULL_DESCRIPTIONS_QUERY = QUERY_DIR / "count_null_descriptions.sql"
+COUNT_NULL_DESC_QUERY = QUERY_DIR / "count_null_descriptions.sql"
 COUNT_AVG_DESC_LENGTH_QUERY = QUERY_DIR / "count_avg_desc_length.sql"
 COUNT_SHORTEST_DESC_QUERY = QUERY_DIR / "count_shortest_desc.sql"
 COUNT_LONGEST_DESC_QUERY = QUERY_DIR / "count_longest_desc.sql"
+SET_QUALITY_QUERY = QUERY_DIR / "set_quality.sql"
+
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s | %(levelname)s | %(message)s"
+)
 
 
 def run_data_profile(db_path):
@@ -24,6 +25,8 @@ def run_data_profile(db_path):
         return
     stats = get_data_profile_stats(db_path)
     print_data_profile_report(stats)
+    set_data_quality(db_path)
+    quarantine_low_quality_profiles(db_path)
 
 
 def input_db_isValid(db_path):
@@ -55,7 +58,7 @@ def get_data_profile_stats(db_path):
             stats["null_titles"] = cursor.fetchone()[0]
             cursor.execute(COUNT_NULL_COMPANIES_QUERY.read_text(encoding="utf-8"))
             stats["null_companies"] = cursor.fetchone()[0]
-            cursor.execute(COUNT_NULL_DESCRIPTIONS_QUERY.read_text(encoding="utf-8"))
+            cursor.execute(COUNT_NULL_DESC_QUERY.read_text(encoding="utf-8"))
             stats["null_descriptions"] = cursor.fetchone()[0]
             cursor.execute(COUNT_AVG_DESC_LENGTH_QUERY.read_text(encoding="utf-8"))
             stats["avg_length"] = cursor.fetchone()[0]
@@ -83,3 +86,12 @@ def print_data_profile_report(stats):
         f"\n    ↳ source_id: {stats['longest_desc'][0]} | "
         f"job_title: {stats['longest_desc'][1]}"
     )
+
+
+def set_data_quality(db_path):
+    try:
+        with sqlite3.connect(db_path) as conn:
+            cursor = conn.cursor()
+            cursor.executescript(SET_QUALITY_QUERY.read_text(encoding="utf-8"))
+    except sqlite3.Error as code:
+        logging.error(f"Set Quality Error: {code}")
