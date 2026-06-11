@@ -13,7 +13,6 @@ DB_NAME = "jobs.db"
 
 
 def run_profiler():
-    print("📊 Profiling: ...")
     run_data_profile(GOLD_DIR / DB_NAME)
 
 def run_gold():
