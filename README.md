@@ -35,7 +35,7 @@ A central orchestrator (`main.py`) wires all stages together and exposes a CLI w
 | Requirement | Version |
 |-------------|---------|
 | Python | **3.14.x** |
-| [uv](https://docs.astral.sh/uv/) | latest |
+| [uv](https://docs.astral.sh/uv/getting-started/installation/) | latest |
 
 > All Python dependencies are pinned to exact versions in `pyproject.toml`. Do not manually upgrade packages.
 
