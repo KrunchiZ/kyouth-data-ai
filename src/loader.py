@@ -14,6 +14,8 @@ logging.basicConfig(
 QUERY_DIR = Path("queries")
 OPEN_TABLE_QUERY = QUERY_DIR / "open_table.sql"
 INSERT_FIELDS_QUERY = QUERY_DIR / "insert_fields.sql"
+UPDATE_FIELDS_QUERY = QUERY_DIR / "update_fields.sql"
+GET_CONTENT_HASH_QUERY = QUERY_DIR / "get_content_hash.sql"
 
 
 def load_all_jsons(input_dir, output_dir):
@@ -24,20 +26,26 @@ def load_all_jsons(input_dir, output_dir):
 
     insert_count = 0
     conn = init_db(output_dir / "jobs.db")
+    cursor = conn.cursor()
     for json_file in input_dir.glob("*.json"):
         try:
             with open(json_file, "r", encoding="utf-8") as in_file:
                 data = json.load(in_file)
             
             entry = init_entry(data)
-            cursor = conn.cursor()
-            cursor.execute(INSERT_FIELDS_QUERY.read_text(encoding="utf-8")
-                           , tuple(entry.values()))
-            if cursor.rowcount == 1:
+            cursor.execute(GET_CONTENT_HASH_QUERY.read_text(encoding="utf-8")
+                            , (entry["source_id"],))
+            existing_hash = cursor.fetchone()
+            if existing_hash is None:
+                upsert_entry(conn, entry, "insert")
                 logging.info(f"Inserted: {json_file.name}")
                 insert_count += 1
+            elif existing_hash[0] != entry["content_hash"]:
+                upsert_entry(conn, entry, "update")
+                logging.info(f"Updated: {json_file.name}")
+                insert_count += 1
             else:
-                logging.warning(f"Skipped (duplicate): {json_file.name}")
+                logging.info(f"Skipped (duplicate): {json_file.name}")
             conn.commit()
 
         except Exception as code:
@@ -77,19 +85,40 @@ def init_db(db_path):
 
 
 def init_entry(data):
-    source_id =     data["source_id"]
-    job_title =     data["job_title"]
-    company =       data["company"]
-    description =   data["description"]
-    hash_input =    f"{job_title}|{company}|{description}"
-    content_hash =  sha256(hash_input.encode()).hexdigest()    
+    # Create a unique hash for the job posting based on its content.
+    # Exclude source_id, tech_stack and quality.
+    hash_input = f"{data['job_title']}|{data['company']}|{data['description']}"
 
     return {    
-        "source_id":    source_id,
-        "job_title":    job_title,
-        "company":      company,
-        "description":  description,
+        "source_id":    data["source_id"],
+        "job_title":    data["job_title"],
+        "company":      data["company"],
+        "description":  data["description"],
         "tech_stack":   None,
         "quality":      None,
-        "content_hash": content_hash
+        "content_hash": sha256(hash_input.encode()).hexdigest()
     }
+
+
+def upsert_entry(conn, entry, action):
+    cursor = conn.cursor()
+    if action == "insert":
+        cursor.execute(INSERT_FIELDS_QUERY.read_text(encoding="utf-8"), (
+                       entry["source_id"],
+                       entry["job_title"],
+                       entry["company"],
+                       entry["description"],
+                       entry["tech_stack"],
+                       entry["quality"],
+                       entry["content_hash"]
+        ))
+    elif action == "update":
+        cursor.execute(UPDATE_FIELDS_QUERY.read_text(encoding="utf-8"), (
+                       entry["job_title"],
+                       entry["company"],
+                       entry["description"],
+                       entry["tech_stack"],
+                       entry["quality"],
+                       entry["content_hash"],
+                       entry["source_id"]
+        ))

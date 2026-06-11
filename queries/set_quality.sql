@@ -5,7 +5,7 @@ WHERE
     OR company IS NULL 
     OR description IS NULL
     OR LENGTH(description) < 100
-    OR description REGEXP '[!#@\*\$%]{4,}';
+    OR description REGEXP '[!#@\*\$%\?]{4,}';
 
 UPDATE jobs
 SET quality = 'HIGH'
