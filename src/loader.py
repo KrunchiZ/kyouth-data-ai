@@ -2,12 +2,17 @@ import os
 import json
 import sqlite3
 import logging
+from pathlib import Path
 from hashlib import sha256
 
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s | %(levelname)s | %(message)s"
 )
+
+QUERY_DIR = Path("queries")
+OPEN_TABLE_QUERY = QUERY_DIR / "open_table.sql"
+INSERT_FIELDS_QUERY = QUERY_DIR / "insert_fields.sql"
 
 def load_all_jsons(input_dir, output_dir):
     if not input_dir_isValid(input_dir):
@@ -24,16 +29,8 @@ def load_all_jsons(input_dir, output_dir):
             
             entry = init_entry(data)
             cursor = conn.cursor()
-            cursor.execute(
-                """
-                INSERT OR IGNORE INTO jobs (
-                    source_id, job_title, company, description,
-                    tech_stack, quality, content_hash
-                )
-                VALUES (?, ?, ?, ?, ?, ?, ?)
-                """, 
-                tuple(entry.values())
-            )
+            cursor.execute(INSERT_FIELDS_QUERY.read_text(encoding="utf-8")
+                           , tuple(entry.values()))
             if cursor.rowcount == 1:
                 logging.info(f"Inserted: {json_file.name}")
                 insert_count += 1
@@ -73,19 +70,7 @@ def init_output_dir(output_dir):
 def init_db(db_path):
     with sqlite3.connect(db_path) as conn:
         cursor = conn.cursor()
-        cursor.execute(
-            """
-            CREATE TABLE IF NOT EXISTS jobs (
-                source_id       TEXT PRIMARY KEY,
-                job_title       TEXT NOT NULL,
-                company         TEXT NOT NULL,
-                description     TEXT NOT NULL,
-                tech_stack      TEXT,
-                quality         TEXT,
-                content_hash    TEXT NOT NULL
-            )
-            """
-        )
+        cursor.execute(OPEN_TABLE_QUERY.read_text(encoding="utf-8"))
     return conn
 
 
