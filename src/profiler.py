@@ -1,4 +1,5 @@
 import os
+import profile
 import re
 import sqlite3
 import logging
@@ -13,6 +14,9 @@ COUNT_AVG_DESC_LENGTH_QUERY = QUERY_DIR / "count_avg_desc_length.sql"
 COUNT_SHORTEST_DESC_QUERY = QUERY_DIR / "count_shortest_desc.sql"
 COUNT_LONGEST_DESC_QUERY = QUERY_DIR / "count_longest_desc.sql"
 SET_QUALITY_QUERY = QUERY_DIR / "set_quality.sql"
+QUARANTINE_PROFILES_QUERY = QUERY_DIR / "quarantine_profiles.sql"
+GET_LOW_PROFILES_QUERY = QUERY_DIR / "get_low_profiles.sql"
+DELETE_LOW_PROFILES_QUERY = QUERY_DIR / "delete_low_profiles.sql"
 
 
 logging.basicConfig(
@@ -106,8 +110,14 @@ def quarantine_profiles(db_path):
     try:
         with sqlite3.connect(db_path) as conn:
             cursor = conn.cursor()
-            cursor.execute('''
-                '''
-            )
+            cursor.executescript(
+                QUARANTINE_PROFILES_QUERY.read_text(encoding="utf-8"))
+            cursor.execute(GET_LOW_PROFILES_QUERY.read_text(encoding="utf-8"))
+            low_profiles = cursor.fetchall()
+            cursor.execute(
+                DELETE_LOW_PROFILES_QUERY.read_text(encoding="utf-8"))
+            print(f"❌ Quarantined {cursor.rowcount} low quality profiles.")
+            for profile in low_profiles:
+                print(f"    ↳ source_id: {profile[0]} | job_title: {profile[1]}")
     except sqlite3.Error as code:
         logging.error(f"Quarantine Error: {code}")
