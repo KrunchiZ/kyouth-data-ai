@@ -28,9 +28,10 @@ def run_data_profile(db_path):
     if not input_db_isValid(db_path):
         return
     stats = get_data_profile_stats(db_path)
-    print_data_profile_report(stats)
-    set_data_quality(db_path)
-    quarantine_profiles(db_path)
+    if stats is not None:
+        print_data_profile_report(stats)
+        set_data_quality(db_path)
+        quarantine_profiles(db_path)
 
 
 def input_db_isValid(db_path):
@@ -49,7 +50,7 @@ def get_data_profile_stats(db_path):
         "null_titles": 0,
         "null_companies": 0,
         "null_descriptions": 0,
-        "avg_length": 0.0,
+        "avg_length": 0,
         "shortest_desc": (None, None, None),
         "longest_desc": (None, None, None)
     }
@@ -72,6 +73,7 @@ def get_data_profile_stats(db_path):
             stats["longest_desc"] = cursor.fetchone()
     except sqlite3.Error as code:
         logging.error(f"Profile Error: {code}")
+        return None
     return stats
 
 
