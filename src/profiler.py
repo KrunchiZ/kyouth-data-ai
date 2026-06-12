@@ -82,7 +82,7 @@ def print_data_profile_report(stats):
         f"\n❓ Missing Values -> job_title: {stats['null_titles']}, "
         f"company: {stats['null_companies']}, "
         f"description: {stats['null_descriptions']}"
-        f"\n📝 Avg Description Length: {stats['avg_length']:.2f} chars"
+        f"\n📝 Avg Description Length: {stats['avg_length']} chars"
         f"\n⚠️ Shortest Description: {stats['shortest_desc'][2]} chars"
         f"\n    ↳ source_id: {stats['shortest_desc'][0]} | "
         f"job_title: {stats['shortest_desc'][1]}"

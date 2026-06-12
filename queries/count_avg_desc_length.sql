@@ -1,1 +1,1 @@
-SELECT AVG(LENGTH(description)) FROM jobs;
+SELECT CAST(ROUND(AVG(LENGTH(description))) AS INTEGER) FROM jobs;
