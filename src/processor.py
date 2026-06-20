@@ -85,5 +85,5 @@ def get_soup_text(soup, attr_value):
 	if tag is None:
 		return None
 	if attr_value == "jobAdDetails":
-		return " ".join(tag.get_text(separator=" ", strip=True).split())
+		return " ".join(tag.get_text(separator=" ", strip=True).split(" "))
 	return tag.get_text(separator=" ", strip=True)
